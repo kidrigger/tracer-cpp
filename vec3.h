@@ -30,6 +30,13 @@ public:
     inline float &g() { return e[1]; }
     inline float &b() { return e[2]; }
 
+    const vec3& operator=(const vec3& v) { 
+        for (int i = 0; i < 3; i++) {
+            e[i] = v.e[i]; 
+        }
+        return *this;
+    }
+
     inline const vec3& operator+() const { return *this; }
     inline vec3 operator-() const { return vec3(-e[0], -e[1], -e[2]); }
     inline float operator[](int i) const { return e[i]; }

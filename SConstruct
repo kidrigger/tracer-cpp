@@ -6,7 +6,10 @@ from glob import glob
 
 files = glob("*.cpp")
 
-env.Append(CXXFLAGS="-std=c++17")
+env.Append(CXXFLAGS=["-std=c++17", "-g"])
+env.Append(CPPPATH="threadpool")
 
-env.Program('tracer.out', files)
+libraries = ["pthread"]
+
+env.Program('tracer.out', files, LIBS=libraries)
 

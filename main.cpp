@@ -1,6 +1,11 @@
 #include <iostream>
 #include <string>
 #include <fstream>
+#include <vector>
+#include <deque>
+
+#include <ThreadPool.h>
+
 #include "ray.h"
 #include "sphere.h"
 #include "hitable.h"
@@ -10,7 +15,7 @@
 
 #include "rng.h"
 
-vec3 color(const ray& r, hitable* world, int depth) {
+vec3 color(const ray& r, const hitable* world, int depth) {
     hit_record rec;
     if (depth == 0) {
         return vec3(0.0f);
@@ -30,9 +35,28 @@ vec3 color(const ray& r, hitable* world, int depth) {
     }
 }
 
+using framebuffer = std::vector<vec3>;
+
+struct threadsafe
+{
+    std::mutex sync_mutex;
+
+    void accumulate(framebuffer& acc, const framebuffer& source) {
+        sync_mutex.lock();
+        std::transform(acc.begin(), acc.end(), source.begin(), acc.begin(), std::plus<vec3>());
+        sync_mutex.unlock();
+    }
+};
+
+void operator/=(framebuffer& buffer, float scalar) {
+    for (auto& element : buffer) {
+        element /= scalar;
+    }
+}
+
 int main(int argc, char* argv[]) {
-    int WIDTH = 200, HEIGHT = 100;
-    int NSAMPLES = 10;
+    unsigned int WIDTH = 200, HEIGHT = 100;
+    unsigned int NSAMPLES = 10;
 
     std::ios_base::sync_with_stdio(false);
     std::cout.tie(nullptr);
@@ -46,7 +70,7 @@ int main(int argc, char* argv[]) {
             HEIGHT = atoi(argv[++i]);
         }
     }
-
+    
     vec3 eye = vec3(1);
     vec3 target = vec3(0, 0, -1);
     float focal_length = (target - eye).length();
@@ -58,21 +82,39 @@ int main(int argc, char* argv[]) {
     w.add<sphere>(vec3(1,0,-1), 0.5f, new metallic(vec3(0.8f, 0.6f, 0.2f), 0.2f));
     w.add<sphere>(vec3(0,-100.5f, -1), 100.0f, new lambertian(vec3(0.8f, 0.8f, 0.0f)));
 
+    auto optimal_threads = std::thread::hardware_concurrency();
+    
+    framebuffer accumulator(WIDTH * HEIGHT);
+    {
+        ThreadPool pool(optimal_threads);
+
+        threadsafe synchronized;
+        for (int s = 0; s < NSAMPLES; s++) {
+            pool.enqueue([cam, HEIGHT, WIDTH, &synchronized, &accumulator, &w]() {
+            framebuffer buffer(WIDTH * HEIGHT);
+                for (int j = 0; j < HEIGHT; j++) {
+                    for (int i = 0; i < WIDTH; i++) {
+                        float u = (i + rng())/(float)WIDTH;
+                        float v = (j + rng())/(float)HEIGHT;
+                        ray r = cam.get_ray(u, v);
+                        buffer[j*WIDTH + i] = color(r, &w, 25);
+                    }
+                }
+                synchronized.accumulate(accumulator, buffer);
+            });
+        }
+    }
+
+    accumulator /= NSAMPLES;
+
     std::cout << "P3 " << WIDTH << ' ' << HEIGHT << " 255\n";
     for (int j = HEIGHT-1; j >= 0; j--) {
         for (int i = 0; i < WIDTH; i++) {
-            vec3 col(0.0f);
-            for (int s = 0; s < NSAMPLES; s++) {
-                float u = (i + rng())/(float)WIDTH;
-                float v = (j + rng())/(float)HEIGHT;
-                ray r = cam.get_ray(u, v);
-                col += color(r, &w, NSAMPLES);
-            }
-            col /= NSAMPLES;
-            float ir = (int)(255.99f*(col.r()));
-            float ig = (int)(255.99f*(col.g()));
-            float ib = (int)(255.99f*(col.b()));
-            std::cout << ir << ' ' << ig << ' ' << ib << '\n';
+            vec3 color = accumulator[j*WIDTH + i];
+            int r = static_cast<int>(255.99f * color.r());
+            int g = static_cast<int>(255.99f * color.g());
+            int b = static_cast<int>(255.99f * color.b());
+            std::cout << r << ' ' << g << ' ' << b << '\n';
         }
     }
 
