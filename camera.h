@@ -1,6 +1,6 @@
 
-#ifndef CAMERA_H
-#define CAMERA_H
+#ifndef _CAMERA_H
+#define _CAMERA_H
 
 #include "ray.h"
 #include "rng.h"
@@ -44,4 +44,4 @@ class camera {
         }
 };
 
-#endif // CAMERA_H
+#endif // _CAMERA_H
