@@ -6,7 +6,7 @@ from glob import glob
 
 files = glob("*.cpp")
 
-env.Append(CXXFLAGS=["-std=c++17", "-g"])
+env.Append(CXXFLAGS=["-std=c++1z", "-g"])
 env.Append(CPPPATH="threadpool")
 
 libraries = ["pthread"]

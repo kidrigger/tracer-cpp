@@ -2,3 +2,6 @@
 *.out
 .sconsign.dblite
 *.ppm
+.DS_Store
+.vs
+.vscode
