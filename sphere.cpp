@@ -9,7 +9,7 @@ bool sphere::hit(const ray &r, float tmin, float tmax, hit_record &rec) const {
 	float disc = b * b - a * c;
 	if (disc > 0) {
 		float temp = (-b - sqrt(b * b - a * c)) / a;
-		if (temp < tmax && temp > tmin) {
+		if (temp < tmax && temp >= tmin) {
 			rec.t = temp;
 			rec.p = r[rec.t];
 			rec.normal = (rec.p - C) / R;
@@ -17,7 +17,7 @@ bool sphere::hit(const ray &r, float tmin, float tmax, hit_record &rec) const {
 			return true;
 		}
 		temp = (-b + sqrt(b * b - a * c)) / a;
-		if (temp < tmax && temp > tmin) {
+		if (temp < tmax && temp >= tmin) {
 			rec.t = temp;
 			rec.p = r[rec.t];
 			rec.normal = (rec.p - C) / R;

@@ -118,19 +118,29 @@ int main(int argc, char *argv[]) {
 		}
 	}
 
-	vec3 eye = vec3(1);
-	vec3 target = vec3(0, 0, -1);
+	vec3 eye = vec3(0, 0, -1);
+	vec3 target = vec3(0, 0, 0);
 	float focal_length = (target - eye).length();
 	camera cam(eye, target, vec3(0, 1, 0), 60.0f, (float)WIDTH / (float)HEIGHT,
-			0.1f, focal_length);
+			0.0f, focal_length);
 
 	world w;
 	// w.add<sphere>(vec3(-1, 0, -1), 0.5f, new dielectric(1.5f));
-	// w.add<sphere>(vec3(0, 0, -1), 0.5f, new lambertian(vec3(0.1f, 0.2f,
-	// 0.5f))); w.add<sphere>(vec3(1, 0, -1), 0.5f,
-	//               new metallic(vec3(0.8f, 0.6f, 0.2f), 0.2f));
+	// w.add<sphere>(vec3(0, 0, -1), 0.5f, new lambertian(vec3(0.1f, 0.2f, 0.5f)));
+	// w.add<sphere>(vec3(1, 0, -1), 0.5f,
+	// 		new metallic(vec3(0.8f, 0.6f, 0.2f), 0.2f));
 	// w.add<sphere>(vec3(0, -100.5f, -1), 100.0f,
-	//               new lambertian(vec3(0.8f, 0.8f, 0.0f)));
+	// 		new lambertian(vec3(0.8f, 0.8f, 0.0f)));
+
+	for (int i = -5; i < 5; i++) {
+		for (int j = -5; j < 5; j++) {
+			for (int k = -5; k < 5; k++) {
+				w.add<sphere>(vec3(i + 0.5f, j + 0.5f, k + 0.5f), 0.25f, new metallic(vec3(0.8f), 0.0f));
+			}
+		}
+	}
+
+	w.compile();
 
 	auto optimal_threads = std::thread::hardware_concurrency();
 
@@ -141,6 +151,11 @@ int main(int argc, char *argv[]) {
 		std::cerr << "RESOLUTION = " << WIDTH << "x" << HEIGHT << std::endl;
 		std::cerr << "SAMPLES = " << NSAMPLES << std::endl;
 		std::cerr << "THREADS = " << optimal_threads << std::endl;
+
+		int count = NSAMPLES;
+
+		auto cbk = [&count]() {count--; std::cerr << '\r' << count; };
+		pool.register_callback(cbk);
 
 		for (int s = 0; s < NSAMPLES; s++) {
 			pool.enqueue([cam, HEIGHT, WIDTH, &accumulator, &w]() {
