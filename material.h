@@ -11,18 +11,19 @@ public:
 	virtual ~material() {}
 };
 
+template <typename TEXTURE>
 class lambertian : public material {
-	vec3 albedo;
+	TEXTURE albedo;
 
 public:
-	lambertian(const vec3 &albedo) :
+	lambertian(const TEXTURE &albedo) :
 			albedo(albedo) {}
 	virtual bool scatter(
 			const ray &r, const hit_record &hit,
 			vec3 &attenuation, ray &scattered) const {
 		vec3 target = hit.p + hit.normal + random_in_unit_sphere();
 		scattered = ray(hit.p, target - hit.p);
-		attenuation = albedo;
+		attenuation = albedo.sample(0, 0, hit.p);
 		return true;
 	}
 };

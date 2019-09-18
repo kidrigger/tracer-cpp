@@ -6,10 +6,12 @@
 #include "rng.h"
 #include "sphere.h"
 #include "stbi_write.h"
+#include "texture.h"
 #include "world.h"
 #include <ThreadPool.h>
 #include <deque>
 #include <fstream>
+#include <iomanip>
 #include <iostream>
 #include <string>
 #include <vector>
@@ -63,24 +65,24 @@ int main(int argc, char *argv[]) {
 			0.0f, focal_length);
 
 	world w;
-	// w.add<sphere>(vec3(-1, 0, -1), 0.5f, new dielectric(1.5f));
-	// w.add<sphere>(vec3(0, 0, -1), 0.5f, new lambertian(vec3(0.1f, 0.2f, 0.5f)));
-	// w.add<sphere>(vec3(1, 0, -1), 0.5f,
-	// 		new metallic(vec3(0.8f, 0.6f, 0.2f), 0.2f));
-	// w.add<sphere>(vec3(0, -100.5f, -1), 100.0f,
-	// 		new lambertian(vec3(0.8f, 0.8f, 0.0f)));
+	w.add<sphere>(vec3(-1, 0, -1), 0.5f, new dielectric(1.5f));
+	w.add<sphere>(vec3(0, 0, -1), 0.5f, new lambertian<constant_texture>(constant_texture(vec3(0.1f, 0.2f, 0.5f))));
+	w.add<sphere>(vec3(1, 0, -1), 0.5f,
+			new metallic(vec3(0.8f, 0.6f, 0.2f), 0.2f));
+	w.add<sphere>(vec3(0, -100.5f, -1), 100.0f,
+			new lambertian<checker_texture>(checker_texture(vec3(0.8f, 0.8f, 0.0f), vec3(0), vec3(10.0f))));
 
-	for (int i = -5; i < 5; i++) {
-		for (int j = -5; j < 5; j++) {
-			for (int k = -5; k < 5; k++) {
-				w.add<sphere>(vec3(-1, -1, -1) + vec3(rng(), rng(), rng()) - 0.5f, 10.f / 165.f, new lambertian(vec3(0.7f, 0.7f, 0.6f)));
-			}
-		}
-	}
+	// for (int i = -5; i < 5; i++) {
+	// 	for (int j = -5; j < 5; j++) {
+	// 		for (int k = -5; k < 5; k++) {
+	// 			w.add<sphere>(vec3(-1, -1, -1) + vec3(rng(), rng(), rng()) - 0.5f, 10.f / 165.f, new lambertian(vec3(0.7f, 0.7f, 0.6f)));
+	// 		}
+	// 	}
+	// }
 
-	w.add<sphere>(vec3(1, 0, 0), 0.5f, new metallic(vec3(0.8f), 0.0f));
-	w.add<sphere>(vec3(0, 0, 0), 0.5f, new dielectric(1.5f));
-	w.add<sphere>(vec3(0, 0, 0), -0.48f, new dielectric(1.5f));
+	// w.add<sphere>(vec3(1, 0, 0), 0.5f, new metallic(vec3(0.8f), 0.0f));
+	// w.add<sphere>(vec3(0, 0, 0), 0.5f, new dielectric(1.5f));
+	// w.add<sphere>(vec3(0, 0, 0), -0.48f, new dielectric(1.5f));
 
 	w.compile();
 
@@ -95,13 +97,12 @@ int main(int argc, char *argv[]) {
 		std::cerr << "MAX_DEPTH = " << config.MAX_DEPTH << std::endl;
 		std::cerr << "THREADS = " << optimal_threads << std::endl;
 
-		int count = config.NSAMPLES;
-
-		auto cbk = [&count]() {count--; std::cerr << '\r' << count; };
-		pool.register_callback(cbk);
+		int work = 0;
+		float total_work_inv = (100.0f / (config.NSAMPLES * config.HEIGHT));
+		float next_work = 1.0f;
 
 		for (int s = 0; s < config.NSAMPLES; s++) {
-			pool.enqueue([cam, &config, &accumulator, &w]() {
+			pool.enqueue([cam, total_work_inv, &next_work, &work, &config, &accumulator, &w]() {
 				framebuffer<single_thread_policy> buffer(config.WIDTH, config.HEIGHT);
 				for (int j = 0; j < config.HEIGHT; j++) {
 					for (int i = 0; i < config.WIDTH; i++) {
@@ -109,6 +110,11 @@ int main(int argc, char *argv[]) {
 						float v = (j + rng()) / (float)config.HEIGHT;
 						ray r = cam.get_ray(u, v);
 						buffer[j * config.WIDTH + i] = color(r, &w, config.MAX_DEPTH);
+					}
+					work++;
+					if (work * total_work_inv > next_work) {
+						next_work += 0.25f;
+						std::cerr << '\r' << std::setprecision(2) << std::fixed << work * total_work_inv << "%\t";
 					}
 				}
 				accumulator += buffer;
