@@ -1,8 +1,9 @@
 #ifndef _FRAMEBUFFER_H
 #define _FRAMEBUFFER_H
 
-#include <thread>
 #include <vector>
+#include <mutex>
+#include <algorithm>
 
 class single_thread_policy {
 public:
