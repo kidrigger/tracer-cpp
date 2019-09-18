@@ -58,27 +58,28 @@ int main(int argc, char *argv[]) {
 		}
 	}
 
-	vec3 eye = vec3(0, 0, 1);
+	vec3 eye = vec3(1, 1, 1);
 	vec3 target = vec3(0, 0, 0);
 	float focal_length = (target - eye).length();
-	camera cam(eye, target, vec3(0, 1, 0), 90.0f, (float)config.WIDTH / (float)config.HEIGHT,
+	camera cam(eye, target, vec3(0, 1, 0), 60.0f, (float)config.WIDTH / (float)config.HEIGHT,
 			0.0f, focal_length);
 
 	world w;
-	w.add<sphere>(vec3(-1, 0, -1), 0.5f, new dielectric(1.5f));
-	w.add<sphere>(vec3(0, 0, -1), 0.5f, new lambertian<constant_texture>(constant_texture(vec3(0.1f, 0.2f, 0.5f))));
-	w.add<sphere>(vec3(1, 0, -1), 0.5f,
+	w.add<sphere>(vec3(-1, 0, 0), 0.5f, new dielectric(1.5f));
+	w.add<sphere>(vec3(-1, 0, 0), -0.48f, new dielectric(1.5f));
+	w.add<sphere>(vec3(0, 0, 0), 0.5f, new lambertian<constant_texture>(constant_texture(vec3(0.1f, 0.2f, 0.5f))));
+	w.add<sphere>(vec3(1, 0, 0), 0.5f,
 			new metallic(vec3(0.8f, 0.6f, 0.2f), 0.2f));
-	w.add<sphere>(vec3(0, -100.5f, -1), 100.0f,
+	w.add<sphere>(vec3(0, -100.5f, 0), 100.0f,
 			new lambertian<checker_texture>(checker_texture(vec3(0.8f, 0.8f, 0.0f), vec3(0), vec3(10.0f))));
 
-	// for (int i = -5; i < 5; i++) {
-	// 	for (int j = -5; j < 5; j++) {
-	// 		for (int k = -5; k < 5; k++) {
-	// 			w.add<sphere>(vec3(-1, -1, -1) + vec3(rng(), rng(), rng()) - 0.5f, 10.f / 165.f, new lambertian(vec3(0.7f, 0.7f, 0.6f)));
-	// 		}
-	// 	}
-	// }
+	for (int i = -5; i < 5; i++) {
+	    for (int j = -5; j < 5; j++) {
+		    for (int k = -5; k < 5; k++) {
+	 			w.add<sphere>(vec3(-2, 0, 0) + vec3(rng(), rng(), rng()) - 0.5f, 0.04f, new lambertian(constant_texture(vec3(0.7f, 0.7f, 0.6f))));
+	 		}
+	 	}
+	}
 
 	// w.add<sphere>(vec3(1, 0, 0), 0.5f, new metallic(vec3(0.8f), 0.0f));
 	// w.add<sphere>(vec3(0, 0, 0), 0.5f, new dielectric(1.5f));
