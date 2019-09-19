@@ -44,9 +44,6 @@ int main(int argc, char *argv[]) {
 		unsigned int MAX_DEPTH = 25;
 	} config{};
 
-	std::ios_base::sync_with_stdio(false);
-	std::cout.tie(nullptr);
-
 	for (int i = 0; i < argc; i++) {
 		if ("-s" == std::string(argv[i])) {
 			config.NSAMPLES = atoi(argv[++i]);
@@ -67,19 +64,19 @@ int main(int argc, char *argv[]) {
 	world w;
 	w.add<sphere>(vec3(-1, 0, 0), 0.5f, new dielectric(1.5f));
 	w.add<sphere>(vec3(-1, 0, 0), -0.48f, new dielectric(1.5f));
-	w.add<sphere>(vec3(0, 0, 0), 0.5f, new lambertian<constant_texture>(constant_texture(vec3(0.1f, 0.2f, 0.5f))));
+	w.add<sphere>(vec3(0, 0, 0), 0.5f, new lambertian<checker_texture>(checker_texture(vec3(0.8f, 0.8f, 0.0f), vec3(0), vec3(100.0f))));
 	w.add<sphere>(vec3(1, 0, 0), 0.5f,
 			new metallic(vec3(0.8f, 0.6f, 0.2f), 0.2f));
 	w.add<sphere>(vec3(0, -100.5f, 0), 100.0f,
-			new lambertian<checker_texture>(checker_texture(vec3(0.8f, 0.8f, 0.0f), vec3(0), vec3(10.0f))));
+			new lambertian<perlin_texture>(perlin_texture(vec3(5.0f))));
 
-	for (int i = -5; i < 5; i++) {
-	    for (int j = -5; j < 5; j++) {
-		    for (int k = -5; k < 5; k++) {
-	 			w.add<sphere>(vec3(-2, 0, 0) + vec3(rng(), rng(), rng()) - 0.5f, 0.04f, new lambertian(constant_texture(vec3(0.7f, 0.7f, 0.6f))));
-	 		}
-	 	}
-	}
+	// for (int i = -5; i < 5; i++) {
+	// 	for (int j = -5; j < 5; j++) {
+	// 		for (int k = -5; k < 5; k++) {
+	// 			w.add<sphere>(vec3(-2, 0, 0) + vec3(rng(), rng(), rng()) - 0.5f, 0.04f, new dielectric(1.5f)); //lambertian(constant_texture(vec3(0.7f, 0.7f, 0.6f))));
+	// 		}
+	// 	}
+	// }
 
 	// w.add<sphere>(vec3(1, 0, 0), 0.5f, new metallic(vec3(0.8f), 0.0f));
 	// w.add<sphere>(vec3(0, 0, 0), 0.5f, new dielectric(1.5f));
@@ -100,7 +97,7 @@ int main(int argc, char *argv[]) {
 
 		int work = 0;
 		float total_work_inv = (100.0f / (config.NSAMPLES * config.HEIGHT));
-		float next_work = 1.0f;
+		float next_work = 0.01f;
 
 		for (int s = 0; s < config.NSAMPLES; s++) {
 			pool.enqueue([cam, total_work_inv, &next_work, &work, &config, &accumulator, &w]() {
@@ -114,8 +111,8 @@ int main(int argc, char *argv[]) {
 					}
 					work++;
 					if (work * total_work_inv > next_work) {
-						next_work += 0.25f;
-						std::cerr << '\r' << std::setprecision(2) << std::fixed << work * total_work_inv << "%\t";
+						next_work += 0.01f;
+						std::cerr << '\r' << std::setprecision(2) << std::fixed << work * total_work_inv << "%\t\t";
 					}
 				}
 				accumulator += buffer;
