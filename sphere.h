@@ -6,6 +6,7 @@
 #include "material.h"
 
 class sphere : public hitable {
+protected:
 	vec3 C;
 	float R;
 	material *mat;

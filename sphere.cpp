@@ -14,6 +14,7 @@ bool sphere::hit(const ray &r, float tmin, float tmax, hit_record &rec) const {
 			rec.p = r[rec.t];
 			rec.normal = (rec.p - C) / R;
 			rec.mat = mat;
+			rec.obj = static_cast<const hitable *>(this);
 			return true;
 		}
 		temp = (-b + sqrt(b * b - a * c)) / a;
@@ -22,6 +23,7 @@ bool sphere::hit(const ray &r, float tmin, float tmax, hit_record &rec) const {
 			rec.p = r[rec.t];
 			rec.normal = (rec.p - C) / R;
 			rec.mat = mat;
+			rec.obj = static_cast<const hitable *>(this);
 			return true;
 		}
 	}

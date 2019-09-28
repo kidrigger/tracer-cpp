@@ -40,7 +40,7 @@ inline float perlin_interp(vec3 c[2][2][2], float u, float v, float w) {
 			}
 		}
 	}
-	return (accum + 1.0f) / 2.0f;
+	return accum;
 }
 
 float perlin::noise(const vec3 &p) const {
@@ -61,4 +61,16 @@ float perlin::noise(const vec3 &p) const {
 	}
 	float f = perlin_interp(c, u, v, w);
 	return f;
+}
+
+float perlin::turb(const vec3 &p, int depth) const {
+	float accum = 0;
+	vec3 temp_p = p;
+	float weight = 1.0f;
+	for (int i = 0; i < depth; i++) {
+		accum += weight * noise(temp_p);
+		weight *= 0.5f;
+		temp_p *= 2.0f;
+	}
+	return std::abs(accum);
 }

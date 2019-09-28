@@ -24,15 +24,17 @@ vec3 color(const ray &r, const hitable *world, int depth) {
 	if (world->hit(r, 0.001f, MAXFLOAT, rec)) {
 		vec3 attenuation;
 		ray scattered;
+		vec3 emission = rec.mat->emission(rec.u, rec.v, rec.p);
 		if (rec.mat->scatter(r, rec, attenuation, scattered)) {
-			return attenuation * color(scattered, world, depth - 1);
+			return emission + attenuation * color(scattered, world, depth - 1);
 		} else {
-			return vec3(0.0f);
+			return emission;
 		}
 	} else {
-		vec3 unit_dir = normalize(r.direction());
-		float t = 0.5f * (unit_dir.y() + 1.0f);
-		return (1.0f - t) * vec3(1.0f) + t * vec3(0.5f, 0.7f, 1.0f);
+		// vec3 unit_dir = normalize(r.direction());
+		// float t = 0.5f * (unit_dir.y() + 1.0f);
+		// return = (1.0f - t) * vec3(1.0f) + t * vec3(0.5f, 0.7f, 1.0f);
+		return vec3(0.0f);
 	}
 }
 
@@ -62,13 +64,12 @@ int main(int argc, char *argv[]) {
 			0.0f, focal_length);
 
 	world w;
+	w.add<constant_medium<sphere> >(0.7f, vec3(0, 0, 0), 2.f, new isotropic<perlin_texture>(perlin_texture(vec3(5.f))));
 	w.add<sphere>(vec3(-1, 0, 0), 0.5f, new dielectric(1.5f));
-	w.add<sphere>(vec3(-1, 0, 0), -0.48f, new dielectric(1.5f));
-	w.add<sphere>(vec3(0, 0, 0), 0.5f, new lambertian<checker_texture>(checker_texture(vec3(0.8f, 0.8f, 0.0f), vec3(0), vec3(100.0f))));
-	w.add<sphere>(vec3(1, 0, 0), 0.5f,
-			new metallic(vec3(0.8f, 0.6f, 0.2f), 0.2f));
-	w.add<sphere>(vec3(0, -100.5f, 0), 100.0f,
-			new lambertian<perlin_texture>(perlin_texture(vec3(5.0f))));
+	w.add<sphere>(vec3(-1, 0, 0), 0.45f, new lambertian<constant_texture>(constant_texture(vec3(0.8f, 0.2f, 0.1f))));
+	w.add<sphere>(vec3(0, 0, 0), 0.2f, new lambertian<constant_texture>(constant_texture(vec3(0.8f)), vec3(10.0f)));
+	w.add<sphere>(vec3(1, 0, 0), 0.5f, new metallic(vec3(0.8f, 0.6f, 0.2f), 0.2f));
+	w.add<sphere>(vec3(0, -100.5f, 0), 100.0f, new lambertian<checker_texture>(checker_texture(vec3(1.0f), vec3(0.0f), vec3(10.0f))));
 
 	// for (int i = -5; i < 5; i++) {
 	// 	for (int j = -5; j < 5; j++) {
@@ -121,9 +122,11 @@ int main(int argc, char *argv[]) {
 	}
 
 	accumulator /= config.NSAMPLES;
+
 	std::vector<uint8_t> img(config.WIDTH * config.HEIGHT * 3);
 	int i = 0;
 	for (auto &pixel : accumulator) {
+		pixel = pixel / (pixel + 1.0f);
 		for (int j = 0; j < 3; j++) {
 			img[3 * i + j] = static_cast<uint8_t>(255.99f * pixel[j]);
 		}

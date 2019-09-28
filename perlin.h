@@ -15,6 +15,7 @@ class perlin {
 
 public:
 	float noise(const vec3 &p) const;
+	float turb(const vec3 &p, int depth = 7) const;
 };
 
 #endif /* _PERLIN_H */

@@ -6,12 +6,16 @@
 #include "ray.h"
 
 class material;
+class hitable;
 
 struct hit_record {
 	float t;
 	vec3 p;
+	float u;
+	float v;
 	vec3 normal;
 	material *mat;
+	const hitable *obj;
 };
 
 class hitable {
