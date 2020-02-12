@@ -25,5 +25,9 @@ env.add_sources(env, '*.cpp')
 Export('env')
 
 SConscript('#material/SCsub')
+SConscript('#geometry/SCsub')
+SConscript('#textures/SCsub')
+SConscript('#core/SCsub')
+SConscript('#stb/SCsub')
 
 env.Program('tracer.out', env.sources, LIBS=libraries)

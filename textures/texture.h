@@ -2,7 +2,7 @@
 #define _TEXTURE_H
 
 #include "perlin.h"
-#include "vec3.h"
+#include <core.h>
 
 class texture {
 public:

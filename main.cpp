@@ -1,15 +1,9 @@
-#include "camera.h"
-#include "framebuffer.h"
-#include "hitable.h"
-#include "material/material.h"
-#include "ray.h"
-#include "rng.h"
-#include "shape.h"
-#include "sphere.h"
-#include "stbi_write.h"
-#include "texture.h"
-#include "volume.h"
-#include "world.h"
+#include "stb/stbi_write.h"
+
+#include "core.h"
+#include "geometries.h"
+#include "shaders.h"
+#include "textures.h"
 
 #include <ThreadPool.h>
 #include <deque>

@@ -1,8 +1,7 @@
 #ifndef _PERLIN_H
 #define _PERLIN_H
 
-#include "rng.h"
-#include "vec3.h"
+#include <core.h>
 #include <cassert>
 #include <iostream>
 #include <vector>

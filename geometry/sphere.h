@@ -17,13 +17,20 @@ public:
 			R(r),
 			box(cen - r, cen + r),
 			shape(mat) {}
+
 	virtual ~sphere() {}
+
 	virtual bool hit(const ray &r, float tmin, float tmax, hit_record &rec) const;
+
 	virtual const aabb &get_aabb() const { return box; }
-	const vec3 &center() const { return C; }
-	vec3 &center() { return C; }
-	float radius() const { return R; }
-	float &radius() { return R; }
+
+	inline const vec3 &center() const { return C; }
+
+	inline vec3 &center() { return C; }
+
+	inline float radius() const { return R; }
+
+	inline float &radius() { return R; }
 };
 
 #endif /* _SPHERE_H */
