@@ -16,5 +16,5 @@ $ scons
 
 To Run
 ```bash
-$ ./tracer.out [-r <WIDTH> <HEIGHT>] [-s NUM_SAMPLES]
+$ ./tracer.out [-r <WIDTH> <HEIGHT>] [-s NUM_SAMPLES] [-d DEPTH]
 ```

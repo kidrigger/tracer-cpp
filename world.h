@@ -12,12 +12,13 @@ class world : public hitable {
 	bvh tree;
 
 public:
-	world() :
-			box(vec3(0), vec3(0)) {}
-	template <typename T, typename... Ts>
-	void add(Ts &&... args) {
-		hitlist.push_back(new T(std::forward<Ts>(args)...));
+	world() noexcept
+			: box(vec3(0), vec3(0)) {}
+
+	void add(hitable *object) {
+		hitlist.push_back(object);
 	}
+
 	virtual const aabb &get_aabb() const { return box; }
 
 	void compile() {
@@ -25,6 +26,7 @@ public:
 	}
 
 	virtual bool hit(const ray &r, float tmin, float tmax, hit_record &rec) const;
+
 	virtual ~world() {
 		for (hitable *obj : hitlist) {
 			delete obj;

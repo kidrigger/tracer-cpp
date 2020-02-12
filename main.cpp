@@ -1,13 +1,16 @@
 #include "camera.h"
 #include "framebuffer.h"
 #include "hitable.h"
-#include "material.h"
+#include "material/material.h"
 #include "ray.h"
 #include "rng.h"
+#include "shape.h"
 #include "sphere.h"
 #include "stbi_write.h"
 #include "texture.h"
+#include "volume.h"
 #include "world.h"
+
 #include <ThreadPool.h>
 #include <deque>
 #include <fstream>
@@ -64,12 +67,12 @@ int main(int argc, char *argv[]) {
 			0.0f, focal_length);
 
 	world w;
-	w.add<constant_medium<sphere> >(0.7f, vec3(0, 0, 0), 2.f, new isotropic<perlin_texture>(perlin_texture(vec3(5.f))));
-	w.add<sphere>(vec3(-1, 0, 0), 0.5f, new dielectric(1.5f));
-	w.add<sphere>(vec3(-1, 0, 0), 0.45f, new lambertian<constant_texture>(constant_texture(vec3(0.8f, 0.2f, 0.1f))));
-	w.add<sphere>(vec3(0, 0, 0), 0.2f, new lambertian<constant_texture>(constant_texture(vec3(0.8f)), vec3(10.0f)));
-	w.add<sphere>(vec3(1, 0, 0), 0.5f, new metallic(vec3(0.8f, 0.6f, 0.2f), 0.2f));
-	w.add<sphere>(vec3(0, -100.5f, 0), 100.0f, new lambertian<checker_texture>(checker_texture(vec3(1.0f), vec3(0.0f), vec3(10.0f))));
+	w.add(new constant_medium(new sphere(vec3(0, 0, 0), 2.f, new isotropic(vec3(0.8f))), 0.7f));
+	w.add(new sphere(vec3(-1, 0, 0), 0.5f, new dielectric(1.5f)));
+	w.add(new sphere(vec3(-1, 0, 0), 0.45f, new lambertian(new constant_texture(vec3(0.8f, 0.2f, 0.1f)))));
+	w.add(new sphere(vec3(0, 0, 0), 0.2f, new lambertian(new constant_texture(vec3(0.8f)), vec3(10.0f))));
+	w.add(new sphere(vec3(1, 0, 0), 0.5f, new metallic(vec3(0.8f, 0.6f, 0.2f), 0.2f)));
+	w.add(new sphere(vec3(0, -100.5f, 0), 100.0f, new lambertian(new checker_texture(vec3(1.0f), vec3(0.0f), vec3(10.0f)))));
 
 	// for (int i = -5; i < 5; i++) {
 	// 	for (int j = -5; j < 5; j++) {

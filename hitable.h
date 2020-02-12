@@ -14,7 +14,7 @@ struct hit_record {
 	float u;
 	float v;
 	vec3 normal;
-	material *mat;
+	const material *mat;
 	const hitable *obj;
 };
 
