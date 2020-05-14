@@ -5,8 +5,6 @@
 #include "ray.h"
 #include "rng.h"
 
-const float PI = 3.1415826f;
-
 class camera {
 private:
 	vec3 lower_left_corner;

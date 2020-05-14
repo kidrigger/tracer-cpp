@@ -27,6 +27,11 @@ bvh_node::bvh_node(const std::vector<hitable *>::iterator &beg, const std::vecto
 	} else if (size == 2) {
 		lchild = new bvh_node(*beg);
 		rchild = new bvh_node(*(beg + 1));
+	} else if (size == 1) {
+		lchild = new bvh_node(*beg);
+		rchild = nullptr;
+	} else if (size == 0) {
+		lchild = rchild = nullptr;
 	} else {
 		int axis = static_cast<int>(2.99f * rng());
 		std::sort(beg, end, [axis](hitable *a, hitable *b) {
@@ -37,7 +42,9 @@ bvh_node::bvh_node(const std::vector<hitable *>::iterator &beg, const std::vecto
 		lchild = new bvh_node(beg, mid);
 		rchild = new bvh_node(mid, end);
 	}
-	box = aabb::combine(lchild->get_aabb(), rchild->get_aabb());
+	if (lchild && rchild) {
+		box = aabb::combine(lchild->get_aabb(), rchild->get_aabb());
+	}
 }
 
 bool bvh_node::hit(const ray &r, float t_min, float t_max, hit_record &rec) const {

@@ -72,12 +72,20 @@ inline vec3 operator*(float f, const vec3 &vec) {
 	return vec * f;
 }
 
+inline vec3 operator/(float f, const vec3 &vec) {
+	return vec3(f / vec.x(), f / vec.y(), f / vec.z());
+}
+
 inline vec3 normalize(const vec3 &vec) {
 	return vec.normalized();
 }
 
 inline float dot(const vec3 &a, const vec3 &b) {
 	return a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+}
+
+inline vec3 pow(const vec3 &a, float ex) {
+	return vec3(powf32(a.x(), ex), powf32(a.y(), ex), powf32(a.z(), ex));
 }
 
 inline vec3 cross(const vec3 &a, const vec3 &b) {

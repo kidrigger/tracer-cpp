@@ -7,7 +7,7 @@ from glob import glob
 env.sources = []
 
 env.Append(CXXFLAGS=['-std=c++1z', '-g'])
-env.Append(CPPPATH=['#','threadpool'])
+env.Append(CPPPATH=['#','#include','#threadpool'])
 
 libraries = ["pthread"]
 
@@ -30,4 +30,4 @@ SConscript('#textures/SCsub')
 SConscript('#core/SCsub')
 SConscript('#stb/SCsub')
 
-env.Program('tracer.out', env.sources, LIBS=libraries)
+env.Program('#bin/tracer.out', env.sources, LIBS=libraries)
