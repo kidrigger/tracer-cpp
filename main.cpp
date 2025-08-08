@@ -7,9 +7,9 @@
 
 #include <ThreadPool.h>
 #include <atomic>
+#include <string_view>
 
 constexpr float EXPOSURE = 4.5f;
-constexpr float GAMMA = 2.2f;
 
 vec3 Uncharted2Tonemap(const vec3 &color) {
 	constexpr float A = 0.15f;
@@ -46,26 +46,28 @@ vec3 color(const ray &r, const hitable *world, int depth) {
 		vec3 unit_dir = normalize(r.direction());
 		float t = 0.5f * (unit_dir.y() + 1.0f);
 		return (1.0f - t) * vec3(1.0f) + t * vec3(0.5f, 0.7f, 1.0f);
-		// return vec3(0.0f);
 	}
 }
 
 int main(int argc, char *argv[]) {
 	struct {
-		unsigned int WIDTH = 640;
-		unsigned int HEIGHT = 480;
-		unsigned int NSAMPLES = 10;
-		unsigned int MAX_DEPTH = 5;
-	} config{};
+		uint WIDTH = 640;
+		uint HEIGHT = 480;
+		uint NSAMPLES = 10;
+		uint MAX_DEPTH = 5;
+		uint TILE_SIZE = 4;
+	} config;
 
 	for (int i = 0; i < argc; i++) {
-		if ("-s" == std::string(argv[i])) {
+		if ("-s" == std::string_view(argv[i])) {
 			config.NSAMPLES = atoi(argv[++i]);
-		} else if ("-r" == std::string(argv[i])) {
+		} else if ("-r" == std::string_view(argv[i])) {
 			config.WIDTH = atoi(argv[++i]);
 			config.HEIGHT = atoi(argv[++i]);
-		} else if ("-d" == std::string(argv[i])) {
+		} else if ("-d" == std::string_view(argv[i])) {
 			config.MAX_DEPTH = atoi(argv[++i]);
+		} else if ("-t" == std::string_view(argv[i])) {
+			config.TILE_SIZE = atoi(argv[++i]);
 		}
 	}
 
@@ -114,17 +116,17 @@ int main(int argc, char *argv[]) {
 	wrld.compile();
 
 	auto optimal_threads = std::thread::hardware_concurrency();
+	printf("RESOLUTION = %ux%u\n", config.WIDTH, config.HEIGHT);
+	printf("SAMPLES = %u\n", config.NSAMPLES);
+	printf("MAX_DEPTH = %u\n", config.MAX_DEPTH);
+	printf("THREADS = %u\n", optimal_threads);
+	printf("TILE SIZE = %u\n", config.TILE_SIZE);
 
 	framebuffer accumulator(config.WIDTH, config.HEIGHT);
 
-	std::vector<tile> tiles = create_tiles(accumulator, 16, 16);
+	std::vector<tile> tiles = create_tiles(accumulator, config.TILE_SIZE, config.TILE_SIZE);
 	{
 		ThreadPool pool(optimal_threads);
-
-		std::cerr << "RESOLUTION = " << config.WIDTH << "x" << config.HEIGHT << std::endl;
-		std::cerr << "SAMPLES = " << config.NSAMPLES << std::endl;
-		std::cerr << "MAX_DEPTH = " << config.MAX_DEPTH << std::endl;
-		std::cerr << "THREADS = " << optimal_threads << std::endl;
 
 		volatile std::atomic_size_t work = 0;
 		size_t total_work = config.WIDTH * config.HEIGHT * config.NSAMPLES;
