@@ -10,6 +10,7 @@
 #include <string_view>
 
 constexpr float EXPOSURE = 4.5f;
+constexpr uint NTHREAD_AUTO = 0xFFFFFFFF;
 
 vec3 Uncharted2Tonemap(const vec3 &color) {
 	constexpr float A = 0.15f;
@@ -55,6 +56,7 @@ int main(int argc, char *argv[]) {
 		uint HEIGHT = 480;
 		uint NSAMPLES = 10;
 		uint MAX_DEPTH = 5;
+		uint NTHREADS = NTHREAD_AUTO;
 		uint TILE_SIZE = 4;
 	} config;
 
@@ -66,8 +68,10 @@ int main(int argc, char *argv[]) {
 			config.HEIGHT = atoi(argv[++i]);
 		} else if ("-d" == std::string_view(argv[i])) {
 			config.MAX_DEPTH = atoi(argv[++i]);
-		} else if ("-t" == std::string_view(argv[i])) {
+		} else if ("-x" == std::string_view(argv[i])) {
 			config.TILE_SIZE = atoi(argv[++i]);
+		} else if ("-j" == std::string_view(argv[i])) {
+			config.NTHREADS = atoi(argv[++i]);
 		}
 	}
 
@@ -104,7 +108,7 @@ int main(int argc, char *argv[]) {
 	for (int i = -5; i < 5; i++) {
 		for (int j = -5; j < 5; j++) {
 			for (int k = -5; k < 5; k++) {
-				wrld.add(new sphere(vec3(0, 0, -1) + vec3(rng(), rng(), rng()) - 0.5f, 0.04f, new dielectric(1.5f))); // lambertian(constant_texture(vec3(0.7f, 0.7f, 0.6f))));
+				wrld.add(new sphere(vec3(0, 0, -1) + vec3(rng(), rng(), rng()) - 0.5f, 0.04f, /*new dielectric(1.5f))); //*/ new lambertian(new constant_texture(vec3(0.7f, 0.7f, 0.6f)))));
 			}
 		}
 	}
@@ -115,18 +119,20 @@ int main(int argc, char *argv[]) {
 
 	wrld.compile();
 
-	auto optimal_threads = std::thread::hardware_concurrency();
+	if (config.NTHREADS == NTHREAD_AUTO) {
+		config.NTHREADS = std::thread::hardware_concurrency();
+	}
 	printf("RESOLUTION = %ux%u\n", config.WIDTH, config.HEIGHT);
 	printf("SAMPLES = %u\n", config.NSAMPLES);
 	printf("MAX_DEPTH = %u\n", config.MAX_DEPTH);
-	printf("THREADS = %u\n", optimal_threads);
+	printf("THREADS = %u\n", config.NTHREADS);
 	printf("TILE SIZE = %u\n", config.TILE_SIZE);
 
 	framebuffer accumulator(config.WIDTH, config.HEIGHT);
 
 	std::vector<tile> tiles = create_tiles(accumulator, config.TILE_SIZE, config.TILE_SIZE);
 	{
-		ThreadPool pool(optimal_threads);
+		ThreadPool pool(config.NTHREADS);
 
 		volatile std::atomic_size_t work = 0;
 		size_t total_work = config.WIDTH * config.HEIGHT * config.NSAMPLES;
