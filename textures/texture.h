@@ -1,12 +1,13 @@
 #ifndef _TEXTURE_H
 #define _TEXTURE_H
 
-#include "perlin.h"
 #include "core/prelude.h"
+#include "perlin.h"
 
 class texture {
 public:
 	virtual vec3 sample(float u, float v, const vec3 &point) const = 0;
+	virtual ~texture() = default;
 };
 
 class default_texture {

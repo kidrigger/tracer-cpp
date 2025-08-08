@@ -10,8 +10,7 @@ class constant_medium : public hitable {
 
 public:
 	constant_medium(shape *volume, float density) :
-			density(density),
-			volume(volume) {}
+			volume(volume), density(density) {}
 
 	virtual bool hit(const ray &r, float tmin, float tmax, hit_record &rec) const {
 		hit_record rec1, rec2;

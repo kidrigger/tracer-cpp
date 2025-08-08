@@ -13,10 +13,7 @@ protected:
 
 public:
 	sphere(const vec3 &cen, float r, material *mat) :
-			C(cen),
-			R(r),
-			box(cen - r, cen + r),
-			shape(mat) {}
+			shape(mat), C(cen), R(r), box(cen - r, cen + r) {}
 
 	virtual ~sphere() {}
 

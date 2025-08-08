@@ -51,11 +51,11 @@ public:
 			begin_y(offset_y),
 			end_x(width + offset_x),
 			end_y(height + offset_y),
-			row_width(row_width),
-			data_ptr(data) {}
+			data_ptr(data),
+			row_width(row_width) {}
 
-	int get_width() { return end_x - begin_x; }
-	int get_height() { return end_y - begin_y; }
+	uint get_width() { return end_x - begin_x; }
+	uint get_height() { return end_y - begin_y; }
 
 	std::tuple<uint, uint> true_index(uint i, uint j) {
 		assert(i <= get_width() and j <= get_height());
@@ -79,8 +79,8 @@ inline std::vector<tile> create_tiles(framebuffer &fb, uint width, uint height) 
 	vec3 *data = fb.data();
 	std::vector<tile> tiles;
 	tiles.reserve(x_count * y_count);
-	for (int i = 0; i < x_count; i++) {
-		for (int j = 0; j < y_count; j++) {
+	for (uint i = 0; i < x_count; i++) {
+		for (uint j = 0; j < y_count; j++) {
 			auto tile_width = std::min(width, w - i * width);
 			auto tile_height = std::min(height, h - j * height);
 			tiles.emplace_back(tile_width, tile_height, i * width, j * width, w, data);

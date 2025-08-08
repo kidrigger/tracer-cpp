@@ -6,6 +6,7 @@
 #include "textures/prelude.h"
 
 #include <ThreadPool.h>
+#include <atomic>
 
 constexpr float EXPOSURE = 4.5f;
 constexpr float GAMMA = 2.2f;
@@ -17,13 +18,13 @@ vec3 Uncharted2Tonemap(const vec3 &color) {
 	constexpr float D = 0.2f;
 	constexpr float E = 0.02f;
 	constexpr float F = 0.30f;
-	constexpr float W = 11.2f;
 	return ((color * (A * color + C * B) + D * E) / (color * (A * color + B) + D * F)) - E / F;
 }
 
 vec3 tonemap(const vec3 &color) {
+	constexpr float W = 11.2f;
 	vec3 col = Uncharted2Tonemap(color * EXPOSURE);
-	col = col * (1.0f / Uncharted2Tonemap(vec3(11.2f)));
+	col = col * (1.0f / Uncharted2Tonemap(W));
 	return col;
 }
 
@@ -125,13 +126,13 @@ int main(int argc, char *argv[]) {
 		std::cerr << "MAX_DEPTH = " << config.MAX_DEPTH << std::endl;
 		std::cerr << "THREADS = " << optimal_threads << std::endl;
 
-		volatile std::atomic_int work = 0;
+		volatile std::atomic_size_t work = 0;
 		size_t total_work = config.WIDTH * config.HEIGHT * config.NSAMPLES;
 		float total_work_inv = 100.0f / total_work;
 
 		for (auto &ctile : tiles) {
 			pool.enqueue([&] {
-				for (int s = 0; s < config.NSAMPLES; s++) {
+				for (uint s = 0; s < config.NSAMPLES; s++) {
 					int h = (int)ctile.get_height();
 					int w = (int)ctile.get_width();
 					for (int j = 0; j < h; j++) {
@@ -150,10 +151,10 @@ int main(int argc, char *argv[]) {
 		}
 
 		while (work < total_work) {
-          printf("\r%.2f%% ", work * total_work_inv);
+			printf("\r%.2f%% ", work * total_work_inv);
 		}
 	}
-    
+
 	std::vector<uint8_t> img(config.WIDTH * config.HEIGHT * 3);
 	int i = 0;
 	for (auto &pixel : accumulator) {
@@ -172,7 +173,7 @@ int main(int argc, char *argv[]) {
 	stbi_flip_vertically_on_write(true);
 	stbi_write_png("image.png", config.WIDTH, config.HEIGHT, 3, img.data(), 3 * config.WIDTH);
 
-    printf("\r100.0%%\t");
+	printf("\r100.0%%\t");
 	std::cerr << "\nRender Complete." << std::endl;
 
 	return 0;
