@@ -1,3 +1,4 @@
+#include "core/framebuffer.h"
 #include "stb/stbi_write.h"
 
 #include <core.h>
@@ -6,11 +7,13 @@
 #include <textures.h>
 
 #include <ThreadPool.h>
+#include <atomic>
 #include <cmath>
 #include <deque>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
+#include <mutex>
 #include <string>
 #include <vector>
 
@@ -96,19 +99,19 @@ int main(int argc, char *argv[]) {
 		3,
 	};
 
-	world w;
+	world wrld;
 	// w.add(new constant_medium(new sphere(vec3(0, 0, 0), 2.f, new isotropic(vec3(0.3f))), 0.7f));
-	w.add(new sphere(vec3(-1, 0, 0), 0.5f, new dielectric(1.5f)));
-	w.add(new sphere(vec3(-1, 0, 0), 0.45f, new lambertian(new constant_texture(vec3(0.8f, 0.2f, 0.1f)))));
-	w.add(new sphere(vec3(0, 0, 0), 0.2f, new lambertian(new constant_texture(vec3(0.8f)), vec3(10.0f))));
-	w.add(new sphere(vec3(1, 0, 0), 0.5f, new metallic(vec3(0.8f, 0.6f, 0.2f), 0.2f)));
-	w.add(new sphere(vec3(0, -100.5f, 0), 100.0f, new lambertian(new checker_texture(vec3(1.0f), vec3(0.0f), vec3(10.0f)))));
-	w.add(new mesh(verts, idx, new metallic(vec3(1.0f), 0.0f)));
+	wrld.add(new sphere(vec3(-1, 0, 0), 0.5f, new dielectric(1.5f)));
+	wrld.add(new sphere(vec3(-1, 0, 0), 0.45f, new lambertian(new constant_texture(vec3(0.8f, 0.2f, 0.1f)))));
+	wrld.add(new sphere(vec3(0, 0, 0), 0.2f, new lambertian(new constant_texture(vec3(0.8f)), vec3(10.0f))));
+	wrld.add(new sphere(vec3(1, 0, 0), 0.5f, new metallic(vec3(0.8f, 0.6f, 0.2f), 0.2f)));
+	wrld.add(new sphere(vec3(0, -100.5f, 0), 100.0f, new lambertian(new checker_texture(vec3(1.0f), vec3(0.0f), vec3(10.0f)))));
+	wrld.add(new mesh(verts, idx, new metallic(vec3(1.0f), 0.0f)));
 
 	for (int i = -5; i < 5; i++) {
 		for (int j = -5; j < 5; j++) {
 			for (int k = -5; k < 5; k++) {
-				w.add(new sphere(vec3(0, 0, -1) + vec3(rng(), rng(), rng()) - 0.5f, 0.04f, new dielectric(1.5f))); //lambertian(constant_texture(vec3(0.7f, 0.7f, 0.6f))));
+				wrld.add(new sphere(vec3(0, 0, -1) + vec3(rng(), rng(), rng()) - 0.5f, 0.04f, new dielectric(1.5f))); // lambertian(constant_texture(vec3(0.7f, 0.7f, 0.6f))));
 			}
 		}
 	}
@@ -117,11 +120,13 @@ int main(int argc, char *argv[]) {
 	// w.add<sphere>(vec3(0, 0, 0), 0.5f, new dielectric(1.5f));
 	// w.add<sphere>(vec3(0, 0, 0), -0.48f, new dielectric(1.5f));
 
-	w.compile();
+	wrld.compile();
 
 	auto optimal_threads = std::thread::hardware_concurrency();
 
-	framebuffer<multi_thread_policy> accumulator(config.WIDTH, config.HEIGHT);
+	framebuffer accumulator(config.WIDTH, config.HEIGHT);
+
+	std::vector<tile> tiles = create_tiles(accumulator, 16, 16);
 	{
 		ThreadPool pool(optimal_threads);
 
@@ -130,31 +135,34 @@ int main(int argc, char *argv[]) {
 		std::cerr << "MAX_DEPTH = " << config.MAX_DEPTH << std::endl;
 		std::cerr << "THREADS = " << optimal_threads << std::endl;
 
-		int work = 0;
-		float total_work_inv = (100.0f / (config.NSAMPLES * config.HEIGHT));
-		float next_work = 0.01f;
+		volatile std::atomic_int work = 0;
+		constexpr total_work = config.WIDTH * config.HEIGHT * config.NSAMPLES;
+		float total_work_inv = 100.0f / total_work;
 
-		for (int s = 0; s < config.NSAMPLES; s++) {
-			pool.enqueue([cam, total_work_inv, &next_work, &work, &config, &accumulator, &w]() {
-				framebuffer<single_thread_policy> buffer(config.WIDTH, config.HEIGHT);
-				for (int j = 0; j < config.HEIGHT; j++) {
-					for (int i = 0; i < config.WIDTH; i++) {
-						float u = (i + rng()) / (float)config.WIDTH;
-						float v = (j + rng()) / (float)config.HEIGHT;
-						ray r = cam.get_ray(u, v);
-						buffer[j * config.WIDTH + i] = color(r, &w, config.MAX_DEPTH);
+		for (auto &ctile : tiles) {
+			pool.enqueue([&] {
+				for (int s = 0; s < config.NSAMPLES; s++) {
+					int h = (int)ctile.get_height();
+					int w = (int)ctile.get_width();
+					for (int j = 0; j < h; j++) {
+						for (int i = 0; i < w; i++) {
+							auto [x, y] = ctile.true_index(i, j);
+							float u = (x + rng()) / (float)config.WIDTH;
+							float v = (y + rng()) / (float)config.HEIGHT;
+							ray r = cam.get_ray(u, v);
+							ctile(i, j) += color(r, &wrld, config.MAX_DEPTH) / config.NSAMPLES;
+						}
 					}
-					work++;
-					if (work * total_work_inv > next_work) {
-						next_work += 0.01f;
-						std::cerr << '\r' << std::setprecision(2) << std::fixed << work * total_work_inv << "%\t\t";
-					}
+
+					work += (w * h);
 				}
-				accumulator += buffer;
 			});
 		}
+
+		while (work < total_work) {
+			std::cerr << '\r' << std::setprecision(2) << std::fixed << work * total_work_inv << "%\t\t";
+		}
 	}
-	accumulator /= config.NSAMPLES;
 
 	std::vector<uint8_t> img(config.WIDTH * config.HEIGHT * 3);
 	int i = 0;

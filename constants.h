@@ -6,4 +6,3 @@ constexpr float PI = 3.1415926535f;
 constexpr float F32_EPSILON = 0.0000001f;
 
 #endif // _CONSTANTS_H
-

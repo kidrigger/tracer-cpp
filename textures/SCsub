@@ -1,5 +1,5 @@
-#!/usr/bin/env python
+#!/ usr / bin / env python
 
 Import('env')
 
-env.add_sources(env, '*.cpp')
+		env.add_sources(env, '*.cpp')
