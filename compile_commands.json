@@ -1,1 +1,226 @@
-[]
+[
+  {
+    "arguments": [
+      "/usr/bin/g++",
+      "-c",
+      "-std=c++1z",
+      "-g",
+      "-I.",
+      "-Ithreadpool",
+      "-o",
+      "main.o",
+      "main.cpp"
+    ],
+    "directory": "/home/bob/Play/tracer-cpp",
+    "file": "/home/bob/Play/tracer-cpp/main.cpp",
+    "output": "/home/bob/Play/tracer-cpp/main.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/g++",
+      "-c",
+      "-std=c++1z",
+      "-g",
+      "-I.",
+      "-Ithreadpool",
+      "-o",
+      "material/dielectric.o",
+      "material/dielectric.cpp"
+    ],
+    "directory": "/home/bob/Play/tracer-cpp",
+    "file": "/home/bob/Play/tracer-cpp/material/dielectric.cpp",
+    "output": "/home/bob/Play/tracer-cpp/material/dielectric.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/g++",
+      "-c",
+      "-std=c++1z",
+      "-g",
+      "-I.",
+      "-Ithreadpool",
+      "-o",
+      "material/lambertian.o",
+      "material/lambertian.cpp"
+    ],
+    "directory": "/home/bob/Play/tracer-cpp",
+    "file": "/home/bob/Play/tracer-cpp/material/lambertian.cpp",
+    "output": "/home/bob/Play/tracer-cpp/material/lambertian.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/g++",
+      "-c",
+      "-std=c++1z",
+      "-g",
+      "-I.",
+      "-Ithreadpool",
+      "-o",
+      "material/material.o",
+      "material/material.cpp"
+    ],
+    "directory": "/home/bob/Play/tracer-cpp",
+    "file": "/home/bob/Play/tracer-cpp/material/material.cpp",
+    "output": "/home/bob/Play/tracer-cpp/material/material.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/g++",
+      "-c",
+      "-std=c++1z",
+      "-g",
+      "-I.",
+      "-Ithreadpool",
+      "-o",
+      "material/metallic.o",
+      "material/metallic.cpp"
+    ],
+    "directory": "/home/bob/Play/tracer-cpp",
+    "file": "/home/bob/Play/tracer-cpp/material/metallic.cpp",
+    "output": "/home/bob/Play/tracer-cpp/material/metallic.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/g++",
+      "-c",
+      "-std=c++1z",
+      "-g",
+      "-I.",
+      "-Ithreadpool",
+      "-o",
+      "material/isotropic.o",
+      "material/isotropic.cpp"
+    ],
+    "directory": "/home/bob/Play/tracer-cpp",
+    "file": "/home/bob/Play/tracer-cpp/material/isotropic.cpp",
+    "output": "/home/bob/Play/tracer-cpp/material/isotropic.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/g++",
+      "-c",
+      "-std=c++1z",
+      "-g",
+      "-I.",
+      "-Ithreadpool",
+      "-o",
+      "geometry/sphere.o",
+      "geometry/sphere.cpp"
+    ],
+    "directory": "/home/bob/Play/tracer-cpp",
+    "file": "/home/bob/Play/tracer-cpp/geometry/sphere.cpp",
+    "output": "/home/bob/Play/tracer-cpp/geometry/sphere.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/g++",
+      "-c",
+      "-std=c++1z",
+      "-g",
+      "-I.",
+      "-Ithreadpool",
+      "-o",
+      "textures/perlin.o",
+      "textures/perlin.cpp"
+    ],
+    "directory": "/home/bob/Play/tracer-cpp",
+    "file": "/home/bob/Play/tracer-cpp/textures/perlin.cpp",
+    "output": "/home/bob/Play/tracer-cpp/textures/perlin.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/g++",
+      "-c",
+      "-std=c++1z",
+      "-g",
+      "-I.",
+      "-Ithreadpool",
+      "-o",
+      "core/aabb.o",
+      "core/aabb.cpp"
+    ],
+    "directory": "/home/bob/Play/tracer-cpp",
+    "file": "/home/bob/Play/tracer-cpp/core/aabb.cpp",
+    "output": "/home/bob/Play/tracer-cpp/core/aabb.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/g++",
+      "-c",
+      "-std=c++1z",
+      "-g",
+      "-I.",
+      "-Ithreadpool",
+      "-o",
+      "core/vec3.o",
+      "core/vec3.cpp"
+    ],
+    "directory": "/home/bob/Play/tracer-cpp",
+    "file": "/home/bob/Play/tracer-cpp/core/vec3.cpp",
+    "output": "/home/bob/Play/tracer-cpp/core/vec3.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/g++",
+      "-c",
+      "-std=c++1z",
+      "-g",
+      "-I.",
+      "-Ithreadpool",
+      "-o",
+      "core/world.o",
+      "core/world.cpp"
+    ],
+    "directory": "/home/bob/Play/tracer-cpp",
+    "file": "/home/bob/Play/tracer-cpp/core/world.cpp",
+    "output": "/home/bob/Play/tracer-cpp/core/world.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/g++",
+      "-c",
+      "-std=c++1z",
+      "-g",
+      "-I.",
+      "-Ithreadpool",
+      "-o",
+      "core/ray.o",
+      "core/ray.cpp"
+    ],
+    "directory": "/home/bob/Play/tracer-cpp",
+    "file": "/home/bob/Play/tracer-cpp/core/ray.cpp",
+    "output": "/home/bob/Play/tracer-cpp/core/ray.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/g++",
+      "-c",
+      "-std=c++1z",
+      "-g",
+      "-I.",
+      "-Ithreadpool",
+      "-o",
+      "core/bvh.o",
+      "core/bvh.cpp"
+    ],
+    "directory": "/home/bob/Play/tracer-cpp",
+    "file": "/home/bob/Play/tracer-cpp/core/bvh.cpp",
+    "output": "/home/bob/Play/tracer-cpp/core/bvh.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/g++",
+      "-c",
+      "-std=c++1z",
+      "-g",
+      "-I.",
+      "-Ithreadpool",
+      "-o",
+      "stb/stbi_write.o",
+      "stb/stbi_write.cpp"
+    ],
+    "directory": "/home/bob/Play/tracer-cpp",
+    "file": "/home/bob/Play/tracer-cpp/stb/stbi_write.cpp",
+    "output": "/home/bob/Play/tracer-cpp/stb/stbi_write.o"
+  }
+]

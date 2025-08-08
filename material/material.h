@@ -2,8 +2,8 @@
 #ifndef _MATERIAL_H
 #define _MATERIAL_H
 
-#include <core.h>
-#include <textures.h>
+#include "core/prelude.h"
+#include "textures/prelude.h"
 
 class material {
 public:

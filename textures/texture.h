@@ -2,7 +2,7 @@
 #define _TEXTURE_H
 
 #include "perlin.h"
-#include <core.h>
+#include "core/prelude.h"
 
 class texture {
 public:

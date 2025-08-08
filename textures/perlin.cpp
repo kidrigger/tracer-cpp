@@ -2,6 +2,7 @@
 #include "perlin.h"
 
 #include <algorithm>
+#include <random>
 
 static std::vector<vec3> ranvec_gen() {
 	std::vector<vec3> retval(256);
@@ -16,7 +17,11 @@ static std::vector<int> perm_gen() {
 	for (int i = 0; i < 256; i++) {
 		retval[i] = i;
 	}
-	std::random_shuffle(retval.begin(), retval.end());
+
+    std::random_device rd;
+    std::mt19937 g(rd());
+ 
+	std::shuffle(retval.begin(), retval.end(), g);
 	return retval;
 }
 

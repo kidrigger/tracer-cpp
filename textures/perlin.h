@@ -1,7 +1,7 @@
 #ifndef _PERLIN_H
 #define _PERLIN_H
 
-#include <core.h>
+#include "core/prelude.h"
 #include <cassert>
 #include <iostream>
 #include <vector>

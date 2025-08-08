@@ -2,8 +2,8 @@
 #ifndef _SHAPE_H
 #define _SHAPE_H
 
-#include "material/material.h"
-#include <core.h>
+#include "material/prelude.h"
+#include "core/prelude.h"
 
 class shape : public hitable {
 protected:

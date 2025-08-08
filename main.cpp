@@ -1,21 +1,11 @@
-#include "core/framebuffer.h"
 #include "stb/stbi_write.h"
 
-#include <core.h>
-#include <geometries.h>
-#include <shaders.h>
-#include <textures.h>
+#include "core/prelude.h"
+#include "geometry/prelude.h"
+#include "material/prelude.h"
+#include "textures/prelude.h"
 
 #include <ThreadPool.h>
-#include <atomic>
-#include <cmath>
-#include <deque>
-#include <fstream>
-#include <iomanip>
-#include <iostream>
-#include <mutex>
-#include <string>
-#include <vector>
 
 constexpr float EXPOSURE = 4.5f;
 constexpr float GAMMA = 2.2f;
@@ -136,7 +126,7 @@ int main(int argc, char *argv[]) {
 		std::cerr << "THREADS = " << optimal_threads << std::endl;
 
 		volatile std::atomic_int work = 0;
-		constexpr total_work = config.WIDTH * config.HEIGHT * config.NSAMPLES;
+		size_t total_work = config.WIDTH * config.HEIGHT * config.NSAMPLES;
 		float total_work_inv = 100.0f / total_work;
 
 		for (auto &ctile : tiles) {
@@ -160,10 +150,10 @@ int main(int argc, char *argv[]) {
 		}
 
 		while (work < total_work) {
-			std::cerr << '\r' << std::setprecision(2) << std::fixed << work * total_work_inv << "%\t\t";
+          printf("\r%.2f%% ", work * total_work_inv);
 		}
 	}
-
+    
 	std::vector<uint8_t> img(config.WIDTH * config.HEIGHT * 3);
 	int i = 0;
 	for (auto &pixel : accumulator) {
@@ -182,6 +172,7 @@ int main(int argc, char *argv[]) {
 	stbi_flip_vertically_on_write(true);
 	stbi_write_png("image.png", config.WIDTH, config.HEIGHT, 3, img.data(), 3 * config.WIDTH);
 
+    printf("\r100.0%%\t");
 	std::cerr << "\nRender Complete." << std::endl;
 
 	return 0;

@@ -7,7 +7,7 @@ from glob import glob
 env.sources = []
 
 env.Append(CXXFLAGS=['-std=c++1z', '-g'])
-env.Append(CPPPATH=['#','#include','#threadpool'])
+env.Append(CPPPATH=['#', '#threadpool'])
 
 libraries = ["pthread"]
 
