@@ -10,7 +10,7 @@ class isotropic : public material {
 public:
 	isotropic(const vec3 &color) noexcept;
 
-	virtual bool scatter(const ray &r, const hit_record &hit, vec3 &attenuation, ray &scattered) const;
+	bool scatter(const ray &r, const hit_record &hit, vec3 &attenuation, ray &scattered) const override;
 };
 
 #endif /* _ISOTROPIC_H */

@@ -4,19 +4,18 @@
 
 #include "material.h"
 
+#include <memory>
+
 class lambertian : public material {
-protected:
-	texture *albedo;
+	std::shared_ptr<texture> albedo;
 	vec3 emissive;
 
 public:
-	lambertian(texture *albedo, const vec3 &emission = vec3(0.0f)) noexcept;
+	lambertian(std::shared_ptr<texture> albedo, const vec3 &emission = vec3(0.0f)) noexcept;
 
-	virtual bool scatter(const ray &r, const hit_record &hit, vec3 &attenuation, ray &scattered) const;
+	bool scatter(const ray &r, const hit_record &hit, vec3 &attenuation, ray &scattered) const override;
 
-	virtual vec3 emission(float u, float v, const vec3 &p) const;
-
-	virtual ~lambertian();
+	vec3 emission(float u, float v, const vec3 &p) const override;
 };
 
 #endif /* _LAMBERTIAN_H */

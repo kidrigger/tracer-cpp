@@ -5,14 +5,14 @@
 #include "shape.h"
 
 class constant_medium : public hitable {
-	shape *volume;
+	std::shared_ptr<shape> volume;
 	float density;
 
 public:
-	constant_medium(shape *volume, float density) :
-			volume(volume), density(density) {}
+	constant_medium(std::shared_ptr<shape> volume, float density) :
+			volume(std::move(volume)), density(density) {}
 
-	virtual bool hit(const ray &r, float tmin, float tmax, hit_record &rec) const {
+	bool hit(const ray &r, float tmin, float tmax, hit_record &rec) const override {
 		hit_record rec1, rec2;
 		if (volume->hit(r, -std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), rec1)) {
 			if (volume->hit(r, rec1.t + 0.00001f, std::numeric_limits<float>::max(), rec2)) {
@@ -38,11 +38,7 @@ public:
 		return false;
 	}
 
-	virtual const aabb &get_aabb() const { return volume->get_aabb(); }
-
-	virtual ~constant_medium() {
-		delete volume;
-	}
+	const aabb &get_aabb() const override { return volume->get_aabb(); }
 };
 
 #endif /* _VOLUME_H */

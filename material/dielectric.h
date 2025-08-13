@@ -2,17 +2,16 @@
 #ifndef _DIELECTRIC_H
 #define _DIELECTRIC_H
 
-#include "metallic.h"
+#include "material.h"
 
 class dielectric : public material {
 	float refractive_index;
+  
+	float schlick(float cosine, float ref_idx) const;
 
 public:
 	dielectric(float refractive_index) noexcept;
-	virtual bool scatter(const ray &r, const hit_record &hit, vec3 &attenuation, ray &scattered) const;
-
-private:
-	float schlick(float cosine, float ref_idx) const;
+	bool scatter(const ray &r, const hit_record &hit, vec3 &attenuation, ray &scattered) const override;
 };
 
 #endif /* _DIELECTRIC_H */

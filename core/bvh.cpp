@@ -1,5 +1,6 @@
 
 #include "bvh.h"
+#include "core/hitable.h"
 
 #include <limits>
 
@@ -19,28 +20,28 @@ const aabb &bvh::get_aabb() const {
 	return root->get_aabb();
 }
 
-bvh_node::bvh_node(const std::vector<hitable *>::iterator &beg, const std::vector<hitable *>::iterator &end) {
+bvh_node::bvh_node(const hitlist_iterator &beg, const hitlist_iterator &end) {
 	auto size = (end - beg);
 	if (size == 3) {
-		lchild = new bvh_node(*beg);
-		rchild = new bvh_node(beg + 1, end);
+		lchild = std::make_shared<bvh_node>(*beg);
+		rchild = std::make_shared<bvh_node>(beg + 1, end);
 	} else if (size == 2) {
-		lchild = new bvh_node(*beg);
-		rchild = new bvh_node(*(beg + 1));
+		lchild = std::make_shared<bvh_node>(*beg);
+		rchild = std::make_shared<bvh_node>(*(beg + 1));
 	} else if (size == 1) {
-		lchild = new bvh_node(*beg);
+		lchild = std::make_shared<bvh_node>(*beg);
 		rchild = nullptr;
 	} else if (size == 0) {
 		lchild = rchild = nullptr;
 	} else {
 		int axis = static_cast<int>(2.99f * rng());
-		std::sort(beg, end, [axis](hitable *a, hitable *b) {
+		std::sort(beg, end, [axis](std::shared_ptr<hitable> const &a, std::shared_ptr<hitable> const &b) {
 			return a->get_aabb().get_min()[axis] < b->get_aabb().get_min()[axis];
 		});
 		auto mid_idx = size / 2;
 		auto mid = beg + mid_idx;
-		lchild = new bvh_node(beg, mid);
-		rchild = new bvh_node(mid, end);
+		lchild = std::make_shared<bvh_node>(beg, mid);
+		rchild = std::make_shared<bvh_node>(mid, end);
 	}
 	if (lchild && rchild) {
 		box = aabb::combine(lchild->get_aabb(), rchild->get_aabb());

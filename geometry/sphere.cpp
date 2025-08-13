@@ -13,7 +13,7 @@ bool sphere::hit(const ray &r, float tmin, float tmax, hit_record &rec) const {
 			rec.t = temp;
 			rec.p = r[rec.t];
 			rec.normal = (rec.p - C) / R;
-			rec.mat = m;
+			rec.mat = mat();
 			rec.obj = static_cast<const hitable *>(this);
 			return true;
 		}
@@ -22,10 +22,17 @@ bool sphere::hit(const ray &r, float tmin, float tmax, hit_record &rec) const {
 			rec.t = temp;
 			rec.p = r[rec.t];
 			rec.normal = (rec.p - C) / R;
-			rec.mat = m;
+			rec.mat = mat();
 			rec.obj = static_cast<const hitable *>(this);
 			return true;
 		}
 	}
 	return false;
+}
+
+sphere::sphere(const vec3 &cen, float r, std::shared_ptr<material> mat) :
+		shape(std::move(mat)), C(cen), R(r), box(cen - r, cen + r) {}
+
+const aabb &sphere::get_aabb() const {
+	return box;
 }

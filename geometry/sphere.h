@@ -6,28 +6,19 @@
 #include "shape.h"
 
 class sphere : public shape {
-protected:
 	vec3 C;
 	float R;
 	aabb box;
 
 public:
-	sphere(const vec3 &cen, float r, material *mat) :
-			shape(mat), C(cen), R(r), box(cen - r, cen + r) {}
+	sphere(const vec3 &cen, float r, std::shared_ptr<material> mat);
 
-	virtual ~sphere() {}
+	bool hit(const ray &r, float tmin, float tmax, hit_record &rec) const override;
 
-	virtual bool hit(const ray &r, float tmin, float tmax, hit_record &rec) const;
-
-	virtual const aabb &get_aabb() const { return box; }
+	const aabb &get_aabb() const override;
 
 	inline const vec3 &center() const { return C; }
-
-	inline vec3 &center() { return C; }
-
 	inline float radius() const { return R; }
-
-	inline float &radius() { return R; }
 };
 
 #endif /* _SPHERE_H */

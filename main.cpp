@@ -1,12 +1,13 @@
 #include "stb/stbi_write.h"
 
 #include "core/prelude.h"
+#include "core/thread_pool.h"
 #include "geometry/prelude.h"
 #include "material/prelude.h"
 #include "textures/prelude.h"
 
-#include <ThreadPool.h>
 #include <atomic>
+#include <memory>
 #include <string_view>
 
 constexpr float EXPOSURE = 4.5f;
@@ -98,17 +99,17 @@ int main(int argc, char *argv[]) {
 
 	world wrld;
 	// w.add(new constant_medium(new sphere(vec3(0, 0, 0), 2.f, new isotropic(vec3(0.3f))), 0.7f));
-	wrld.add(new sphere(vec3(-1, 0, 0), 0.5f, new dielectric(1.5f)));
-	wrld.add(new sphere(vec3(-1, 0, 0), 0.45f, new lambertian(new constant_texture(vec3(0.8f, 0.2f, 0.1f)))));
-	wrld.add(new sphere(vec3(0, 0, 0), 0.2f, new lambertian(new constant_texture(vec3(0.8f)), vec3(10.0f))));
-	wrld.add(new sphere(vec3(1, 0, 0), 0.5f, new metallic(vec3(0.8f, 0.6f, 0.2f), 0.2f)));
-	wrld.add(new sphere(vec3(0, -100.5f, 0), 100.0f, new lambertian(new checker_texture(vec3(1.0f), vec3(0.0f), vec3(10.0f)))));
-	wrld.add(new mesh(verts, idx, new metallic(vec3(1.0f), 0.0f)));
+	wrld.add(std::make_shared<sphere>(vec3(-1, 0, 0), 0.5f, std::make_shared<dielectric>(1.5f)));
+	wrld.add(std::make_shared<sphere>(vec3(-1, 0, 0), 0.45f, std::make_shared<lambertian>(std::make_shared<constant_texture>(vec3(0.8f, 0.2f, 0.1f)))));
+	wrld.add(std::make_shared<sphere>(vec3(0, 0, 0), 0.2f, std::make_shared<lambertian>(std::make_shared<constant_texture>(vec3(0.8f)), vec3(10.0f))));
+	wrld.add(std::make_shared<sphere>(vec3(1, 0, 0), 0.5f, std::make_shared<metallic>(vec3(0.8f, 0.6f, 0.2f), 0.2f)));
+	wrld.add(std::make_shared<sphere>(vec3(0, -100.5f, 0), 100.0f, std::make_shared<lambertian>(std::make_shared<checker_texture>(vec3(1.0f), vec3(0.0f), vec3(10.0f)))));
+	wrld.add(std::make_shared<mesh>(verts, idx, std::make_shared<metallic>(vec3(1.0f), 0.0f)));
 
 	for (int i = -5; i < 5; i++) {
 		for (int j = -5; j < 5; j++) {
 			for (int k = -5; k < 5; k++) {
-				wrld.add(new sphere(vec3(0, 0, -1) + vec3(rng(), rng(), rng()) - 0.5f, 0.04f, /*new dielectric(1.5f))); //*/ new lambertian(new constant_texture(vec3(0.7f, 0.7f, 0.6f)))));
+				wrld.add(std::make_shared<sphere>(vec3(0, 0, -1) + vec3(rng(), rng(), rng()) - 0.5f, 0.04f, /*new dielectric(1.5f))); //*/ std::make_shared<lambertian>(std::make_shared<constant_texture>(vec3(0.7f, 0.7f, 0.6f)))));
 			}
 		}
 	}

@@ -1,8 +1,8 @@
 
 #include "lambertian.h"
 
-lambertian::lambertian(texture *albedo, const vec3 &emission) noexcept
-		: albedo(albedo),
+lambertian::lambertian(std::shared_ptr<texture> albedo, const vec3 &emission) noexcept
+		: albedo(std::move(albedo)),
 		  emissive(emission) {}
 
 bool lambertian::scatter(const ray &r, const hit_record &hit, vec3 &attenuation, ray &scattered) const {
@@ -14,8 +14,4 @@ bool lambertian::scatter(const ray &r, const hit_record &hit, vec3 &attenuation,
 
 vec3 lambertian::emission(float u, float v, const vec3 &p) const {
 	return emissive;
-}
-
-lambertian::~lambertian() {
-	delete albedo;
 }

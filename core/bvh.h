@@ -5,58 +5,40 @@
 #include "rng.h"
 #include <algorithm>
 #include <deque>
+#include <memory>
 #include <vector>
 
 class bvh;
 
 class bvh_node : public hitable {
-	hitable *lchild{ nullptr };
-	hitable *rchild{ nullptr };
+	std::shared_ptr<hitable> lchild;
+	std::shared_ptr<hitable> rchild;
 	aabb box;
 
+	using hitlist_iterator = typename std::vector<std::shared_ptr<hitable> >::iterator;
+
 public:
-	bvh_node(hitable *hitter) :
-			lchild(hitter),
-			box(hitter->get_aabb()) {}
-	bvh_node(const std::vector<hitable *>::iterator &beg, const std::vector<hitable *>::iterator &end);
-	virtual bool hit(const ray &r, float t_min, float t_max, hit_record &rec) const;
-	~bvh_node() {
-		if (rchild) {
-			delete lchild;
-			delete rchild;
-		}
-	}
-	const aabb &get_aabb() const { return box; }
+	bvh_node(std::shared_ptr<hitable> hitter) :
+			lchild(std::move(hitter)),
+			box(lchild->get_aabb()) {}
+	bvh_node(const hitlist_iterator &beg, const hitlist_iterator &end);
+	bool hit(const ray &r, float t_min, float t_max, hit_record &rec) const override;
+	const aabb &get_aabb() const override { return box; }
 };
 
 class bvh : public hitable {
-private:
-	bvh_node *root{ nullptr };
+	std::unique_ptr<bvh_node> root;
+
+	using hitlist_iterator = typename std::vector<std::shared_ptr<hitable> >::iterator;
 
 public:
 	bvh() {}
-	bvh(const std::vector<hitable *>::iterator &beg, const std::vector<hitable *>::iterator &end) {
-		root = new bvh_node(beg, end);
-	}
-	bvh(const bvh &other) = delete;
-	bvh &operator=(const bvh &other) = delete;
-	bvh(bvh &&other) {
-		std::swap(root, other.root);
-	}
-	bvh &operator=(bvh &&other) {
-		if (this == &other) {
-			return *this;
-		}
-		std::swap(root, other.root);
-		return *this;
+	bvh(const hitlist_iterator &beg, const hitlist_iterator &end) {
+		root = std::make_unique<bvh_node>(beg, end);
 	}
 
-	virtual const aabb &get_aabb() const;
-	virtual bool hit(const ray &r, float t_min, float t_max, hit_record &rec) const;
-
-	virtual ~bvh() {
-		delete root;
-	}
+	const aabb &get_aabb() const override;
+	bool hit(const ray &r, float t_min, float t_max, hit_record &rec) const override;
 };
 
 #endif /* _BVH_H */

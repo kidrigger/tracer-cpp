@@ -10,9 +10,9 @@ public:
 	virtual ~texture() = default;
 };
 
-class default_texture {
+class default_texture : public texture {
 public:
-	virtual vec3 sample(float u, float v, const vec3 &point) const { return vec3(0.0f); }
+	vec3 sample(float u, float v, const vec3 &point) const override { return vec3(0.0f); }
 };
 
 class constant_texture : public texture {
@@ -21,7 +21,7 @@ class constant_texture : public texture {
 public:
 	constant_texture(const vec3 &color) :
 			color(color) {}
-	virtual vec3 sample(float u, float v, const vec3 &point) const {
+	vec3 sample(float u, float v, const vec3 &point) const override {
 		return color;
 	}
 };
@@ -36,7 +36,7 @@ public:
 			color_odd(odd),
 			color_even(even),
 			scaling_factor(scaling) {}
-	virtual vec3 sample(float u, float v, const vec3 &point) const {
+	vec3 sample(float u, float v, const vec3 &point) const override {
 		float val = sin(point.x() * scaling_factor.x()) * sin(point.y() * scaling_factor.y()) * sin(point.z() * scaling_factor.z());
 		return (val < 0 ? color_even : color_odd);
 	}
@@ -49,7 +49,7 @@ class perlin_texture : public texture {
 public:
 	perlin_texture(const vec3 &scaling = vec3(1.0f)) :
 			scaling_factor(scaling) {}
-	virtual vec3 sample(float u, float v, const vec3 &point) const {
+	vec3 sample(float u, float v, const vec3 &point) const override {
 		return 0.5f * vec3(1.0f + sin(scaling_factor.x() + 10 * generator.turb(point)));
 	}
 };
