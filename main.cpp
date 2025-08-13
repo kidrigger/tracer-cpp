@@ -76,47 +76,57 @@ int main(int argc, char *argv[]) {
 		}
 	}
 
-	vec3 eye = vec3(0.5f, 1.0f, -1.5f);
-	vec3 target = vec3(0, 0, 0);
+	vec3 eye = vec3(0.0f, 0.0f, -2.0f);
+	vec3 target = vec3(0, 0, 0.0f);
 	float focal_length = (target - eye).length();
 	camera cam(eye, target, vec3(0, 1, 0), 60.0f, (float)config.WIDTH / (float)config.HEIGHT,
 			0.0f, focal_length);
 
-	std::vector<vec3> verts = {
-		vec3{ 0.5f, 0.5f, 0.4f }, // TR
-		vec3{ -0.5f, 0.5f, 0.4f }, // TL
-		vec3{ -0.5f, -0.5f, 0.4f }, // BL
-		vec3{ 0.5f, -0.5f, 0.4f }, // BR
-	};
-	std::vector<int> idx = {
-		0,
-		1,
-		2,
-		0,
-		2,
-		3,
-	};
+	std::vector<vec3> verts;
+	{
+		float x_beg = -0.5f;
+		float x_end = 0.5f;
+		float y_beg = -0.5f;
+		float y_end = 0.5f;
+		int subdiv = 100;
+
+		vec3 o = vec3(x_beg, y_beg, 0.5f);
+		vec3 dx = vec3(x_end - x_beg, 0.0f, 0.0f) / subdiv;
+		vec3 dy = vec3(0.0f, y_end - y_beg, 0.0f) / subdiv;
+
+		for (int i = 0; i < subdiv; i++) {
+			for (int j = 0; j < subdiv; j++) {
+				verts.push_back(i * dx + j * dy + o);
+				verts.push_back((i + 1) * dx + j * dy + o);
+				verts.push_back(i * dx + (j + 1) * dy + o);
+
+				verts.push_back((i + 1) * dx + j * dy + o);
+				verts.push_back((i + 1) * dx + (j + 1) * dy + o);
+				verts.push_back(i * dx + (j + 1) * dy + o);
+			}
+		}
+
+		for (vec3 &v : verts) {
+			auto x = v.x();
+			auto y = v.y();
+			auto z = (x * x + y * y) / 2.0f;
+            v.z() -= z;
+        }
+	}
+
+	std::vector<int> idx;
+	idx.reserve(verts.size());
+	for (int i = 0; i < verts.size(); i++) {
+		idx.push_back(i);
+	}
 
 	world wrld;
-	// w.add(new constant_medium(new sphere(vec3(0, 0, 0), 2.f, new isotropic(vec3(0.3f))), 0.7f));
 	wrld.add(std::make_shared<sphere>(vec3(-1, 0, 0), 0.5f, std::make_shared<dielectric>(1.5f)));
 	wrld.add(std::make_shared<sphere>(vec3(-1, 0, 0), 0.45f, std::make_shared<lambertian>(std::make_shared<constant_texture>(vec3(0.8f, 0.2f, 0.1f)))));
-	wrld.add(std::make_shared<sphere>(vec3(0, 0, 0), 0.2f, std::make_shared<lambertian>(std::make_shared<constant_texture>(vec3(0.8f)), vec3(10.0f))));
+	wrld.add(std::make_shared<sphere>(vec3(0, 0, 0.0f), 0.02f, std::make_shared<lambertian>(std::make_shared<constant_texture>(vec3(0.8f)), vec3(10.0f))));
 	wrld.add(std::make_shared<sphere>(vec3(1, 0, 0), 0.5f, std::make_shared<metallic>(vec3(0.8f, 0.6f, 0.2f), 0.2f)));
 	wrld.add(std::make_shared<sphere>(vec3(0, -100.5f, 0), 100.0f, std::make_shared<lambertian>(std::make_shared<checker_texture>(vec3(1.0f), vec3(0.0f), vec3(10.0f)))));
 	wrld.add(std::make_shared<mesh>(verts, idx, std::make_shared<metallic>(vec3(1.0f), 0.0f)));
-
-	for (int i = -5; i < 5; i++) {
-		for (int j = -5; j < 5; j++) {
-			for (int k = -5; k < 5; k++) {
-				wrld.add(std::make_shared<sphere>(vec3(0, 0, -1) + vec3(rng(), rng(), rng()) - 0.5f, 0.04f, /*new dielectric(1.5f))); //*/ std::make_shared<lambertian>(std::make_shared<constant_texture>(vec3(0.7f, 0.7f, 0.6f)))));
-			}
-		}
-	}
-
-	// w.add<sphere>(vec3(1, 0, 0), 0.5f, new metallic(vec3(0.8f), 0.0f));
-	// w.add<sphere>(vec3(0, 0, 0), 0.5f, new dielectric(1.5f));
-	// w.add<sphere>(vec3(0, 0, 0), -0.48f, new dielectric(1.5f));
 
 	wrld.compile();
 
