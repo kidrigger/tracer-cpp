@@ -45,7 +45,7 @@ public:
 			return false;
 		// At this stage we can compute t to find out where the intersection point is on the line.
 		float t = f * dot(edge2, q);
-		if (t > F32_EPSILON) // ray intersection
+		if (t > t_min && t < t_max) // ray intersection
 		{
 			vec3 n = get_normal(u, v);
 			if (dot(n, r.direction()) > 0) {

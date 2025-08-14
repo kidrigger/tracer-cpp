@@ -110,14 +110,8 @@ int main(int argc, char *argv[]) {
 			auto x = v.x();
 			auto y = v.y();
 			auto z = (x * x + y * y) / 2.0f;
-            v.z() -= z;
-        }
-	}
-
-	std::vector<int> idx;
-	idx.reserve(verts.size());
-	for (int i = 0; i < verts.size(); i++) {
-		idx.push_back(i);
+			v.z() -= z;
+		}
 	}
 
 	world wrld;
@@ -126,7 +120,7 @@ int main(int argc, char *argv[]) {
 	wrld.add(std::make_shared<sphere>(vec3(0, 0, 0.0f), 0.02f, std::make_shared<lambertian>(std::make_shared<constant_texture>(vec3(0.8f)), vec3(10.0f))));
 	wrld.add(std::make_shared<sphere>(vec3(1, 0, 0), 0.5f, std::make_shared<metallic>(vec3(0.8f, 0.6f, 0.2f), 0.2f)));
 	wrld.add(std::make_shared<sphere>(vec3(0, -100.5f, 0), 100.0f, std::make_shared<lambertian>(std::make_shared<checker_texture>(vec3(1.0f), vec3(0.0f), vec3(10.0f)))));
-	wrld.add(std::make_shared<mesh>(verts, idx, std::make_shared<metallic>(vec3(1.0f), 0.0f)));
+	wrld.add(std::make_shared<mesh>(verts, std::make_shared<metallic>(vec3(1.0f), 0.0f)));
 
 	wrld.compile();
 
