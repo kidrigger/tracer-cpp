@@ -49,8 +49,8 @@ public:
 		{
 			vec3 n = get_normal(u, v);
 			if (dot(n, r.direction()) > 0) {
-              n = -n;
-            }
+				n = -n;
+			}
 			rec.t = t;
 			rec.u = u;
 			rec.v = v;
@@ -99,13 +99,37 @@ public:
 		box = aabb(min_bound, max_bound);
 	}
 
+	mesh(const std::vector<vec3> &vertices, std::shared_ptr<material> mat) :
+			shape(std::move(mat)) {
+		assert(vertices.size() >= 3);
+		assert(vertices.size() % 3 == 0);
+		polys.reserve(vertices.size() / 3);
+
+		int vert_count = (int)vertices.size();
+		for (int i = 0; i < vert_count; i += 3) {
+			polys.emplace_back(std::make_shared<triangle>(vertices[i], vertices[i + 1], vertices[i + 2]));
+		}
+
+		blas = bvh(polys.begin(), polys.end());
+
+		vec3 min_bound = vertices[0];
+		vec3 max_bound = vertices[0];
+
+		for (auto &vert : vertices) {
+			min_bound = min(min_bound, vert);
+			max_bound = max(max_bound, vert);
+		}
+
+		box = aabb(min_bound, max_bound);
+	}
+
 	bool hit(const ray &r, float t_min, float t_max, hit_record &rec) const override {
 
 		rec.t = t_max + 0.1f;
 
 		if (!blas.hit(r, t_min, t_max, rec)) {
-          return false;
-        }
+			return false;
+		}
 
 		rec.mat = mat();
 		rec.obj = this;
