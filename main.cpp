@@ -1,7 +1,7 @@
-#include "stb/stbi_write.h"
+#include "thirdparty/stbi_write.h"
+#include "thirdparty/thread_pool.h"
 
 #include "core/prelude.h"
-#include "core/thread_pool.h"
 #include "geometry/prelude.h"
 #include "material/prelude.h"
 #include "textures/prelude.h"

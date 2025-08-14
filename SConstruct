@@ -28,6 +28,6 @@ SConscript('#material/SCsub')
 SConscript('#geometry/SCsub')
 SConscript('#textures/SCsub')
 SConscript('#core/SCsub')
-SConscript('#stb/SCsub')
+SConscript('#thirdparty/SCsub')
 
 env.Program('#bin/tracer.out', env.sources, LIBS=libraries)
