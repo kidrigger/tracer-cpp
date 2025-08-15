@@ -11,10 +11,11 @@ class vec3 {
 	float e[3];
 
 public:
-	vec3() {}
-	vec3(float x) :
+	constexpr vec3() :
+			vec3(0.0f) {}
+	constexpr vec3(float x) :
 			vec3(x, x, x) {}
-	vec3(float x, float y, float z) {
+	constexpr vec3(float x, float y, float z) {
 		e[0] = x;
 		e[1] = y;
 		e[2] = z;
@@ -88,6 +89,14 @@ inline vec3 pow(const vec3 &a, float ex) {
 	return vec3(powf32(a.x(), ex), powf32(a.y(), ex), powf32(a.z(), ex));
 }
 
+inline vec3 pow(const vec3 &a, const vec3& ex) {
+  return vec3(powf32(a.x(), ex.x()), powf32(a.y(), ex.y()), powf32(a.z(), ex.z()));
+}
+
+inline vec3 exp(const vec3 &a) {
+  return vec3(exp(a.x()), exp(a.y()), exp(a.z()));
+}
+
 inline vec3 cross(const vec3 &a, const vec3 &b) {
 	return vec3(a[1] * b[2] - a[2] * b[1], -a[0] * b[2] + a[2] * b[0],
 			a[0] * b[1] - a[1] * b[0]);
@@ -99,6 +108,10 @@ inline vec3 min(const vec3 &a, const vec3 &b) {
 
 inline vec3 max(const vec3 &a, const vec3 &b) {
 	return vec3(std::max(a[0], b[0]), std::max(a[1], b[1]), std::max(a[2], b[2]));
+}
+
+inline vec3 saturate(const vec3 &vec) {
+	return min(max(vec, 0.0f), 1.0f);
 }
 
 inline std::istream &operator>>(std::istream &in, vec3 &vec) {

@@ -1,3 +1,5 @@
+#include "environment/skybox.h"
+#include "geometry/volume.h"
 #include "thirdparty/stbi_write.h"
 #include "thirdparty/thread_pool.h"
 
@@ -10,7 +12,7 @@
 #include <memory>
 #include <string_view>
 
-constexpr float EXPOSURE = 4.5f;
+constexpr float EXPOSURE = 2.1f;
 constexpr uint NTHREAD_AUTO = 0xFFFFFFFF;
 
 vec3 Uncharted2Tonemap(const vec3 &color) {
@@ -48,6 +50,25 @@ vec3 color(const ray &r, const hitable *world, int depth) {
 		vec3 unit_dir = normalize(r.direction());
 		float t = 0.5f * (unit_dir.y() + 1.0f);
 		return (1.0f - t) * vec3(1.0f) + t * vec3(0.5f, 0.7f, 1.0f);
+	}
+}
+
+vec3 color(const ray &r, const hitable *world, const skybox *sky, int depth) {
+	hit_record rec;
+	if (depth == 0) {
+		return vec3(0.0f);
+	}
+	if (world->hit(r, 0.001f, MAXFLOAT, rec)) {
+		vec3 attenuation;
+		ray scattered;
+		vec3 emission = rec.mat->emission(rec.u, rec.v, rec.p);
+		if (rec.mat->scatter(r, rec, attenuation, scattered)) {
+          return emission + attenuation * color(scattered, world, sky, depth - 1);
+		} else {
+			return emission;
+		}
+	} else {
+		return sky->sample(r.direction());
 	}
 }
 
@@ -114,9 +135,11 @@ int main(int argc, char *argv[]) {
 		}
 	}
 
+    skybox sky("assets/OvercastSoil.hdr");
+
 	world wrld;
 	wrld.add(std::make_shared<sphere>(vec3(-1, 0, 0), 0.5f, std::make_shared<dielectric>(1.5f)));
-	wrld.add(std::make_shared<sphere>(vec3(-1, 0, 0), 0.45f, std::make_shared<lambertian>(std::make_shared<constant_texture>(vec3(0.8f, 0.2f, 0.1f)))));
+	wrld.add(std::make_shared<constant_medium>(std::make_shared<sphere>(vec3(-1, 0, 0), 0.45f, std::make_shared<lambertian>(std::make_shared<constant_texture>(vec3(0.8f, 0.2f, 0.1f)))), 0.99f));
 	wrld.add(std::make_shared<sphere>(vec3(0, 0, 0.0f), 0.02f, std::make_shared<lambertian>(std::make_shared<constant_texture>(vec3(0.8f)), vec3(10.0f))));
 	wrld.add(std::make_shared<sphere>(vec3(1, 0, 0), 0.5f, std::make_shared<metallic>(vec3(0.8f, 0.6f, 0.2f), 0.2f)));
 	wrld.add(std::make_shared<sphere>(vec3(0, -100.5f, 0), 100.0f, std::make_shared<lambertian>(std::make_shared<checker_texture>(vec3(1.0f), vec3(0.0f), vec3(10.0f)))));
@@ -154,7 +177,7 @@ int main(int argc, char *argv[]) {
 							float u = (x + rng()) / (float)config.WIDTH;
 							float v = (y + rng()) / (float)config.HEIGHT;
 							ray r = cam.get_ray(u, v);
-							ctile(i, j) += color(r, &wrld, config.MAX_DEPTH) / config.NSAMPLES;
+							ctile(i, j) += color(r, &wrld, &sky, config.MAX_DEPTH) / config.NSAMPLES;
 						}
 					}
 
@@ -171,8 +194,9 @@ int main(int argc, char *argv[]) {
 	std::vector<uint8_t> img(config.WIDTH * config.HEIGHT * 3);
 	int i = 0;
 	for (auto &pixel : accumulator) {
-		pixel = pixel / (pixel + 0.25f);
-		// tonemap(pixel);
+		pixel = vec3(1.0f) - exp(-pixel * EXPOSURE);
+		tonemap(pixel);
+		// pixel = pixel / (pixel + 0.25f);
 		for (int j = 0; j < 3; j++) {
 			img[3 * i + j] = static_cast<uint8_t>(255.99f * pixel[j]);
 		}

@@ -1,0 +1,5 @@
+#!python
+
+Import('env')
+
+env.add_sources(env, '*.cpp')
